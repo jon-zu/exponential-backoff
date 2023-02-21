@@ -9,7 +9,11 @@ authors = ["Yoshua Wuyts <yoshuawuyts@gmail.com>"]
 readme = "README.md"
 edition = "2018"
 
+[features]
+default = ["std"]
+std = ["rand/std", "rand/std_rng"]
+
 [dependencies]
-rand = "0.8"
+rand = { version = "0.8", default-features = false }
 
 [dev-dependencies]

@@ -1,30 +1,30 @@
 use super::Backoff;
-use rand::{rngs::StdRng, Rng, SeedableRng};
-use std::{iter, time};
+use core::{iter, time};
 
 /// An exponential backoff iterator.
 #[derive(Debug, Clone)]
-pub struct Iter<'b> {
+pub struct Iter<'b, Rng> {
     inner: &'b Backoff,
-    rng: StdRng,
+    rng: Rng,
     retry_count: u32,
 }
 
-impl<'b> Iter<'b> {
-    pub(crate) fn new(inner: &'b Backoff) -> Self {
-        Self::with_count(inner, 0)
+impl<'b, Rng> Iter<'b, Rng> where Rng: rand::Rng {
+    pub(crate) fn new(inner: &'b Backoff, rng: Rng) -> Self {
+        Self::with_count(inner, 0, rng)
     }
 
-    pub(crate) fn with_count(inner: &'b Backoff, retry_count: u32) -> Self {
+    pub(crate) fn with_count(inner: &'b Backoff, retry_count: u32, rng: Rng) -> Self {
         Self {
             inner,
             retry_count,
-            rng: StdRng::from_entropy(),
+            rng
         }
     }
 }
 
-impl<'b> iter::Iterator for Iter<'b> {
+
+impl<'b, Rng> iter::Iterator for Iter<'b, Rng>  where Rng: rand::Rng {
     type Item = time::Duration;
 
     #[inline]

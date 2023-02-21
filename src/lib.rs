@@ -35,13 +35,14 @@
 //! }
 //! # Ok(()) }
 //! ```
+#![cfg_attr(not(feature = "std"), no_std)]
 
-use std::iter;
-use std::time::Duration;
-
-pub use iterator::Iter;
+use core::time::Duration;
+use rand::SeedableRng;
 
 mod iterator;
+
+pub use iterator::Iter;
 
 /// Exponential backoff type.
 #[derive(Debug, Clone)]
@@ -108,22 +109,24 @@ impl Backoff {
     }
 
     /// Get the next value for the retry count.
-    pub fn next(&self, retry_attempt: u32) -> Option<Duration> {
-        Iter::with_count(self, retry_attempt).next()
+    pub fn next(&self, retry_attempt: u32, rng: impl rand::Rng) -> Option<Duration> {
+        Iter::with_count(self, retry_attempt, rng).next()
     }
 
     /// Create an iterator.
     #[inline]
-    pub fn iter(&self) -> Iter {
-        Iter::new(self)
+    pub fn iter<Rng: rand::Rng>(&self, rng: Rng) -> Iter<Rng> {
+        Iter::new(self, rng)
     }
 }
 
-impl<'b> iter::IntoIterator for &'b Backoff {
+#[cfg(feature = "std")]
+impl<'b> core::iter::IntoIterator for &'b Backoff {
     type Item = Duration;
-    type IntoIter = Iter<'b>;
+    type IntoIter = Iter<'b, rand::rngs::StdRng>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Self::IntoIter::new(self)
+        Self::IntoIter::new(self, rand::rngs::StdRng::from_entropy())
     }
 }
+

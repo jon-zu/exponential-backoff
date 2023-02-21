@@ -3,6 +3,7 @@ extern crate exponential_backoff;
 use exponential_backoff::Backoff;
 use std::{fs, thread, time::Duration};
 
+#[cfg(feature = "std")]
 #[test]
 fn doesnt_crash() -> std::io::Result<()> {
     let retries = 8;
@@ -21,6 +22,7 @@ fn doesnt_crash() -> std::io::Result<()> {
     unreachable!();
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn iterator_completes() {
     let retries = 3;
@@ -35,6 +37,7 @@ fn iterator_completes() {
     assert_eq!(counter, 1 + retries);
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn max_backoff_without_crashing() {
     let retries = u32::MAX;
